@@ -1,0 +1,69 @@
+# ============================================================
+# .gitignore — Job Search AI Agent
+# ============================================================
+
+# NEVER commit these
+.env
+*.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Uploads (user resumes contain PII)
+uploads/
+*.pdf
+*.docx
+*.doc
+
+# Browser agent data
+cookies/
+sessions/
+screenshots/
+
+# Logs (may contain sensitive data)
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite3
+
+# Alembic
+# (keep alembic/ folder but ignore auto-generated files)
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node (frontend)
+node_modules/
+.next/
+frontend/.env.local
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+.dockerignore

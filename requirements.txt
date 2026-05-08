@@ -1,0 +1,55 @@
+# ============================================================
+# Job Search AI Agent - Dependencies
+# Python 3.11+
+# Install: pip install -r requirements.txt
+# ============================================================
+
+# --- Web Framework ---
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# --- Database ---
+sqlalchemy[asyncio]==2.0.30
+asyncpg==0.29.0           # Async PostgreSQL driver
+alembic==1.13.1
+# psycopg2-binary — install AFTER PostgreSQL is set up on your system
+# Run: pip install psycopg2-binary  (after installing PostgreSQL)
+
+# --- Security ---
+cryptography==42.0.7       # Fernet encryption for credentials
+python-jose[cryptography]==3.3.0  # JWT tokens
+passlib[bcrypt]==1.7.4     # Password hashing
+
+# --- Task Queue ---
+celery==5.3.6
+redis==5.0.4
+celery[redis]==5.3.6
+
+# --- AI / LLM ---
+openai==1.30.1
+langchain==0.2.1
+langchain-openai==0.1.8
+
+# --- Browser Automation ---
+playwright==1.44.0
+playwright-stealth==1.0.6
+
+# --- Resume Parsing ---
+PyMuPDF==1.24.3            # PDF parsing
+python-docx==1.1.2         # DOCX parsing
+
+# --- File Handling ---
+python-multipart==0.0.9    # File uploads in FastAPI
+aiofiles==23.2.1           # Async file I/O
+
+# --- Utilities ---
+python-dotenv==1.0.1       # Load .env variables
+pydantic==2.7.1            # Data validation (v2)
+pydantic-settings==2.2.1   # Settings from env
+loguru==0.7.2              # Logging
+httpx==0.27.0              # Async HTTP client
+tenacity==8.3.0            # Retry logic
+
+# --- CAPTCHA Solving ---
+# Sign up at 2captcha.com and add API key to .env
+2captcha-python==1.3.0
