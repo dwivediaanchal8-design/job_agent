@@ -351,6 +351,14 @@ class BaseAgent(ABC):
         """
         ...
 
+    @abstractmethod
+    async def get_job_description(self, job_url: str) -> str:
+        """
+        Opens a job listing page and extracts the full description text.
+        Used to get description for AI matching (Phase 3).
+        """
+        ...
+
     # ─── Safe Page Interaction Helpers ────────────────────────────────────────
 
     async def _safe_click(self, selector: str, timeout: int = 10000) -> bool:

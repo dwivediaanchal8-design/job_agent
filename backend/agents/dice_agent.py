@@ -372,7 +372,7 @@ class DiceAgent(BaseAgent):
         # Deprecated: Logic moved into _extract_job_cards for efficiency
         return None
 
-    async def _get_job_description(self, job_url: str) -> str:
+    async def get_job_description(self, job_url: str) -> str:
         """
         Opens a job listing page and extracts the full description text.
         Used to get description for AI matching (Phase 3).
@@ -482,6 +482,7 @@ class DiceAgent(BaseAgent):
                         failure_reason="external_application_site",
                     )
 
+            await self._screenshot("dice_apply_button_not_found")
             return ApplicationResult(
                 job=job,
                 status="failed",

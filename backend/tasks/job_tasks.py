@@ -374,7 +374,12 @@ def run_job_agent(self, user_id: str, portal: str, dry_run: bool = False) -> dic
 
                     # ── Phase 3: Score the job before applying ─────────────────
                     parsed_resume = user_data.get("parsed_resume", {})
+                    
+                    # Fetch full description if not already present from card
                     job_desc = getattr(job, "description", "") or ""
+                    if not job_desc:
+                        job_desc = await agent.get_job_description(job.job_url)
+                        job.description = job_desc # Store it back in the listing
 
                     match_result = await matcher.score(job_desc, parsed_resume)
                     logger.info(

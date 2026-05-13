@@ -368,7 +368,7 @@ class IndeedAgent(BaseAgent):
             logger.debug(f"[indeed] _parse_job_card error: {e}")
             return None
 
-    async def _get_job_description(self, job_url: str) -> str:
+    async def get_job_description(self, job_url: str) -> str:
         """
         Opens a job listing page and extracts the full description text.
         Used to get description for AI matching (Phase 3).
