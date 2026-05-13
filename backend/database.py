@@ -2,15 +2,21 @@
 database.py — Database Engine & Session Factory
 ================================================
 Uses SQLAlchemy with async support for PostgreSQL.
-All DB operations in this project should be async.
+
+Two session types:
+  AsyncSession     — for FastAPI routes (async/await)
+  SyncSessionFactory — for Celery tasks (sync workers can't use async)
 """
 
+from contextlib import contextmanager
+
+from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     create_async_engine,
     async_sessionmaker,
 )
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 from loguru import logger
 
 from backend.config import settings
@@ -34,6 +40,50 @@ AsyncSessionFactory = async_sessionmaker(
     autoflush=False,
     autocommit=False,
 )
+
+
+# ─── Sync Engine (for Celery workers) ────────────────────────────────────────
+# MENTOR NOTE:
+#   Celery workers are synchronous. We create a separate sync SQLAlchemy engine
+#   pointing to the same database but using the sync driver (psycopg2, not asyncpg).
+#   database_url_sync = postgresql+psycopg2://... (set in .env)
+
+sync_engine = create_engine(
+    settings.database_url_sync,
+    echo=settings.debug,
+    pool_size=5,
+    max_overflow=10,
+    pool_pre_ping=True,
+)
+
+SyncSessionFactory = sessionmaker(
+    bind=sync_engine,
+    expire_on_commit=False,
+    autoflush=False,
+    autocommit=False,
+)
+
+
+@contextmanager
+def get_sync_session():
+    """
+    Context manager that yields a sync SQLAlchemy session.
+    Use ONLY in Celery tasks (not FastAPI routes).
+
+    Usage:
+        with get_sync_session() as db:
+            user = db.execute(select(User)).scalar_one()
+    """
+    session: Session = SyncSessionFactory()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Sync DB error, rolling back: {e}")
+        raise
+    finally:
+        session.close()
 
 
 # ─── Base Model Class ──────────────────────────────────────────────────────────
@@ -77,4 +127,4 @@ async def create_all_tables():
     )
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    logger.info("✅ All database tables created/verified.")
+    logger.info("All database tables created/verified.")

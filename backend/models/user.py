@@ -18,9 +18,8 @@ Columns:
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, Boolean, DateTime, Enum as SAEnum, func
+from sqlalchemy import String, Boolean, DateTime, Enum as SAEnum, func, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID
 
 from backend.database import Base
 
@@ -30,7 +29,7 @@ class User(Base):
 
     # ─── Primary Key ──────────────────────────────────────────────────────────
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         primary_key=True,
         default=uuid.uuid4,
         index=True,

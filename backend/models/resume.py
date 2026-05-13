@@ -19,9 +19,8 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, func
+from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, func, Uuid, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 from backend.database import Base
 
@@ -31,12 +30,12 @@ class Resume(Base):
 
     # ─── Primary Key ──────────────────────────────────────────────────────────
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        Uuid, primary_key=True, default=uuid.uuid4
     )
 
     # ─── Foreign Key ──────────────────────────────────────────────────────────
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -55,7 +54,7 @@ class Resume(Base):
 
     # parsed_json: GPT-4o structured extraction stored as JSONB
     # Structure: {"name": "...", "skills": [...], "experience": [...], ...}
-    parsed_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    parsed_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     # ─── Status ───────────────────────────────────────────────────────────────
     # Only one resume should be active per user

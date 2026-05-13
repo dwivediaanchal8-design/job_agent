@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     debug: bool = Field(default=True, env="DEBUG")
     api_host: str = Field(default="0.0.0.0", env="API_HOST")
     api_port: int = Field(default=8000, env="API_PORT")
+    log_file: str = Field(default="logs/agent.log", env="LOG_FILE")
 
     # --- Database ---
     database_url: str = Field(..., env="DATABASE_URL")
@@ -38,9 +39,18 @@ class Settings(BaseSettings):
         default=1440, env="JWT_ACCESS_TOKEN_EXPIRE_MINUTES"
     )
 
-    # --- OpenAI ---
+    # --- OpenAI / OpenRouter ---
     openai_api_key: str = Field(..., env="OPENAI_API_KEY")
-    openai_model: str = Field(default="gpt-4o", env="OPENAI_MODEL")
+    openai_base_url: str = Field(
+        default="https://api.openai.com/v1", env="OPENAI_BASE_URL"
+    )
+    openai_model: str = Field(default="openai/gpt-4o", env="OPENAI_MODEL")
+    openai_embedding_model: str = Field(
+        default="openai/text-embedding-3-small", env="OPENAI_EMBEDDING_MODEL"
+    )
+
+    # --- Phase 3: AI Features ---
+    cover_letter_enabled: bool = Field(default=True, env="COVER_LETTER_ENABLED")
 
     # --- CAPTCHA ---
     twocaptcha_api_key: str = Field(default="", env="TWOCAPTCHA_API_KEY")
@@ -54,6 +64,14 @@ class Settings(BaseSettings):
         default=50, env="MAX_APPLICATIONS_PER_DAY"
     )
     job_match_threshold: int = Field(default=70, env="JOB_MATCH_THRESHOLD")
+
+    # --- Error Alerting ---
+    smtp_host: str = Field(default="", env="SMTP_HOST")
+    smtp_port: int = Field(default=587, env="SMTP_PORT")
+    smtp_user: str = Field(default="", env="SMTP_USER")
+    smtp_pass: str = Field(default="", env="SMTP_PASS")
+    admin_email: str = Field(default="", env="ADMIN_EMAIL")
+    slack_webhook_url: str = Field(default="", env="SLACK_WEBHOOK_URL")
 
     class Config:
         env_file = ".env"

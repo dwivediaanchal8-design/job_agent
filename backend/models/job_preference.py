@@ -21,9 +21,8 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, Boolean, DateTime, ForeignKey, Integer, Enum as SAEnum, func
+from sqlalchemy import String, Boolean, DateTime, ForeignKey, Integer, Enum as SAEnum, func, Uuid, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID, ARRAY, TEXT
 
 from backend.database import Base
 
@@ -33,12 +32,12 @@ class JobPreference(Base):
 
     # ─── Primary Key ──────────────────────────────────────────────────────────
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        Uuid, primary_key=True, default=uuid.uuid4
     )
 
     # ─── Foreign Key ──────────────────────────────────────────────────────────
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -48,7 +47,7 @@ class JobPreference(Base):
     # ─── Search Criteria ──────────────────────────────────────────────────────
     # PostgreSQL ARRAY for multiple keywords
     keywords: Mapped[list] = mapped_column(
-        ARRAY(TEXT), nullable=False, default=list
+        JSON, nullable=False, default=list
     )
     location: Mapped[str] = mapped_column(String(255), nullable=False, default="Remote")
     job_type: Mapped[str] = mapped_column(
@@ -63,7 +62,7 @@ class JobPreference(Base):
     # ─── Portal Selection ─────────────────────────────────────────────────────
     # Which portals to run the agent on for this user
     portals: Mapped[list] = mapped_column(
-        ARRAY(TEXT), nullable=False, default=lambda: ["indeed"]
+        JSON, nullable=False, default=lambda: ["indeed"]
     )
 
     # ─── Rate Limiting ────────────────────────────────────────────────────────

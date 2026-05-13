@@ -130,3 +130,29 @@ async def get_user_applications(
         .limit(limit)
     )
     return result.scalars().all()
+
+
+@router.post("/reset/{user_id}", status_code=200)
+async def reset_daily_applications(
+    user_id: uuid.UUID,
+    admin_id: uuid.UUID = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Reset a user's daily application count.
+    Deletes all application records from today for this user.
+    Admin only.
+    """
+    today_start = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    
+    from sqlalchemy import delete
+    result = await db.execute(
+        delete(Application).where(
+            and_(Application.user_id == user_id, Application.applied_at >= today_start)
+        )
+    )
+    
+    logger.warning(f"🔄 Admin {admin_id} reset daily applications for user {user_id}")
+    return {"message": "Daily application count reset successfully.", "deleted_count": result.rowcount}
