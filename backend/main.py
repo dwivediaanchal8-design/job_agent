@@ -30,6 +30,7 @@ from backend.api.credentials import router as credentials_router
 from backend.api.resumes import router as resumes_router
 from backend.api.applications import router as applications_router
 from backend.api.logs import router as logs_router
+from backend.api.jobs import router as jobs_router
 
 
 # ─── Startup & Shutdown ───────────────────────────────────────────────────────
@@ -116,6 +117,7 @@ app.include_router(credentials_router)
 app.include_router(resumes_router)
 app.include_router(applications_router)
 app.include_router(logs_router)
+app.include_router(jobs_router)
 
 
 # ─── Health Check ─────────────────────────────────────────────────────────────

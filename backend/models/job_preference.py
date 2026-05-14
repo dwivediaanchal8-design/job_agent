@@ -21,8 +21,9 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, Boolean, DateTime, ForeignKey, Integer, Enum as SAEnum, func, Uuid, JSON
+from sqlalchemy import String, Boolean, DateTime, ForeignKey, Integer, Enum as SAEnum, func, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from backend.database import Base
 
@@ -46,8 +47,8 @@ class JobPreference(Base):
 
     # ─── Search Criteria ──────────────────────────────────────────────────────
     # PostgreSQL ARRAY for multiple keywords
-    keywords: Mapped[list] = mapped_column(
-        JSON, nullable=False, default=list
+    keywords: Mapped[list[str]] = mapped_column(
+        ARRAY(String), nullable=False, default=list
     )
     location: Mapped[str] = mapped_column(String(255), nullable=False, default="Remote")
     job_type: Mapped[str] = mapped_column(
@@ -61,8 +62,8 @@ class JobPreference(Base):
 
     # ─── Portal Selection ─────────────────────────────────────────────────────
     # Which portals to run the agent on for this user
-    portals: Mapped[list] = mapped_column(
-        JSON, nullable=False, default=lambda: ["indeed"]
+    portals: Mapped[list[str]] = mapped_column(
+        ARRAY(String), nullable=False, default=lambda: ["indeed"]
     )
 
     # ─── Rate Limiting ────────────────────────────────────────────────────────

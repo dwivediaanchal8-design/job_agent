@@ -19,7 +19,7 @@ export default function LoginPage() {
 
     try {
       const response = await apiClient.post("/auth/login", {
-        email: email, // Backend expects email
+        email: email,
         password: password,
       });
 
@@ -28,7 +28,7 @@ export default function LoginPage() {
         router.push("/");
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Login failed. Please check your credentials.");
+      setError(err.response?.data?.detail || "Access denied. Check credentials.");
     } finally {
       setLoading(false);
     }
@@ -38,20 +38,20 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={`${styles.loginCard} glass animate-fade-in`}>
         <div className={styles.logo}>
-          <span className={styles.logoIcon}>🤖</span>
-          <h1 className={styles.logoText}>JobAgent</h1>
+          <span className={styles.logoIcon}>⚡</span>
+          <h1 className={styles.logoText}>Antigravity</h1>
         </div>
         
-        <h2 className={styles.title}>Welcome Back</h2>
-        <p className={styles.subtitle}>Enter your credentials to access the dashboard</p>
+        <h2 className={styles.title}>System Access</h2>
+        <p className={styles.subtitle}>Initialize neural link to dashboard</p>
 
         <form className={styles.form} onSubmit={handleLogin}>
           <div className={styles.inputGroup}>
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="email">Neural Identifier (Email)</label>
             <input
               id="email"
               type="email"
-              placeholder="admin@example.com"
+              placeholder="admin@jobagent.ai"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -59,7 +59,7 @@ export default function LoginPage() {
           </div>
 
           <div className={styles.inputGroup}>
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Security Protocol (Password)</label>
             <input
               id="password"
               type="password"
@@ -73,12 +73,12 @@ export default function LoginPage() {
           {error && <div className={styles.error}>{error}</div>}
 
           <button type="submit" className={styles.loginButton} disabled={loading}>
-            {loading ? "Authenticating..." : "Login to Dashboard"}
+            {loading ? "Decrypting..." : "Initialize Command"}
           </button>
         </form>
 
         <div className={styles.footer}>
-          <p>Autonomous Job Search Agent v1.0.0</p>
+          <p>Autonomous Pipeline v1.0.0</p>
         </div>
       </div>
     </div>

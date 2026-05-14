@@ -10,27 +10,30 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: var(--transition-smooth);
 }
 
 .card:hover {
   transform: translateY(-5px);
-  border-color: var(--primary-color);
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .cardLabel {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 .cardValue {
-  font-family: 'Outfit', sans-serif;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: var(--text-primary);
+  background: linear-gradient(135deg, #fff 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .cardTrend {
@@ -41,25 +44,33 @@
   gap: 0.25rem;
 }
 
-.trendUp { color: var(--secondary-color); }
-.trendDown { color: #ef4444; }
+.trendUp { color: var(--accent-success); }
+.trendDown { color: var(--accent-error); }
 
 .dashboardBody {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr 320px;
   gap: 2rem;
   align-items: start;
 }
 
 .mainSection {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .sectionHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  border-radius: 16px;
 }
 
 .table {
@@ -69,38 +80,49 @@
 
 .table th {
   text-align: left;
-  padding: 1rem;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
-  font-weight: 600;
+  padding: 1.25rem 1rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--glass-border);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .table td {
   padding: 1.25rem 1rem;
   font-size: 0.9rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-primary);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-.statusApplied { background: rgba(16, 185, 129, 0.1); color: var(--secondary-color); }
-.statusFailed { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-.statusSkipped { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); }
+.statusApplied { background: rgba(16, 185, 129, 0.1); color: var(--accent-success); border: 1px solid rgba(16, 185, 129, 0.2); }
+.statusFailed { background: rgba(248, 113, 113, 0.1); color: var(--accent-error); border: 1px solid rgba(248, 113, 113, 0.2); }
+.statusSkipped { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.2); }
 
 .score {
   font-weight: 700;
 }
 
-.scoreHigh { color: var(--secondary-color); }
-.scoreMedium { color: #f59e0b; }
-.scoreLow { color: #ef4444; }
+.scoreHigh { color: var(--accent-success); }
+.scoreMedium { color: var(--accent-warning); }
+.scoreLow { color: var(--accent-error); }
 
 .statsSidebar {
   display: flex;
@@ -108,41 +130,73 @@
   gap: 1.5rem;
 }
 
-.chartCard {
+.sidebarCard {
   padding: 1.5rem;
 }
 
-.chartTitle {
+.sidebarTitle {
   font-size: 0.9rem;
+  font-weight: 600;
   margin-bottom: 1.5rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .chartWrapper {
-  height: 200px;
+  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.infoCard {
-  padding: 1.5rem;
-}
-
-.infoCard h4 {
-  margin-bottom: 1.25rem;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+.healthList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .healthItem {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.85rem;
-  margin-bottom: 1rem;
+}
+
+.healthLabel {
+  color: var(--text-secondary);
 }
 
 .healthStatus {
-  color: var(--secondary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
+  color: var(--accent-success);
+}
+
+.healthDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-success);
+  box-shadow: 0 0 8px var(--accent-success);
+}
+
+.controlPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.controlAction {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .dashboardBody {
+    grid-template-columns: 1fr;
+  }
 }

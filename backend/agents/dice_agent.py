@@ -204,10 +204,13 @@ class DiceAgent(BaseAgent):
                 "button:has-text('Logout')",
                 "a:has-text('Logout')",
                 "dhi-user-menu",
-                "button:has-text('Aanchal Dwivedi')",
-                "span:has-text('Aanchal Dwivedi')",
-                "header:has-text('Aanchal Dwivedi')",
             ]
+            
+            # Add dynamic name check if available
+            name = self.user_data.get('name')
+            if name:
+                indicators.append(f"button:has-text('{name}')")
+                indicators.append(f"span:has-text('{name}')")
             for sel in indicators:
                 el = await self._page.query_selector(sel)
                 if el:
@@ -265,7 +268,7 @@ class DiceAgent(BaseAgent):
             search_url = f"{self.BASE_URL}/jobs?{urlencode(params)}"
 
             self._log_action("search_jobs", f"URL: {search_url}")
-            await self._page.goto(search_url, wait_until="networkidle", timeout=60000)
+            await self._page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
             await self._wait_for_page_load()
             await self._human_delay(2000, 3000)
 
@@ -460,27 +463,26 @@ class DiceAgent(BaseAgent):
             if desc_el:
                 job.description = (await desc_el.inner_text()).strip()[:3000]
 
-            # Look for Easy Apply button
+            # Look for Easy Apply / internal Apply button
             easy_apply_btn = await self._page.query_selector(
                 "button:has-text('Easy Apply'), "
+                "button:has-text('Apply Now'), "
+                "a:has-text('Apply Now'), "
+                "a[data-testid='apply-button'], "
+                "button[data-testid='apply-button'], "
                 "apply-button-wc button[mode='primary']"
             )
 
             if easy_apply_btn:
-                return await self._do_easy_apply(job, user_data, dry_run, easy_apply_btn)
-
-            # Regular apply button (external link)
-            apply_btn = await self._page.query_selector(
-                "button:has-text('Apply Now'), a:has-text('Apply Now')"
-            )
-            if apply_btn:
-                href = await apply_btn.get_attribute("href")
-                if href and "dice.com" not in href:
+                href = await easy_apply_btn.get_attribute("href")
+                # If it's a relative link or points to dice.com, it's internal
+                if href and not href.startswith("/") and "dice.com" not in href:
                     return ApplicationResult(
                         job=job,
                         status="skipped",
                         failure_reason="external_application_site",
                     )
+                return await self._do_easy_apply(job, user_data, dry_run, easy_apply_btn)
 
             await self._screenshot("dice_apply_button_not_found")
             return ApplicationResult(

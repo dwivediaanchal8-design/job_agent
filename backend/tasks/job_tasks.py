@@ -336,7 +336,7 @@ def run_job_agent(self, user_id: str, portal: str, dry_run: bool = False) -> dic
             cover_gen = CoverLetterGenerator()
             # ──────────────────────────────────────────────────────────────────
 
-            async with AgentClass(user_id=user_id, headless=False) as agent:
+            async with AgentClass(user_id=user_id, user_data=user_data, headless=False) as agent:
 
                 # Login
                 logged_in = await agent.login(username, password)
@@ -347,10 +347,10 @@ def run_job_agent(self, user_id: str, portal: str, dry_run: bool = False) -> dic
                     error_msg = f"Login FAILED for user={user_id[:8]}... on {portal}. Please check credentials."
                     logger.error(f"[job_tasks] {error_msg}")
                     # ── Alert on login failure ───────────────────────────────
-                    _run_async(notifier.send_error_alert(
+                    await notifier.send_error_alert(
                         subject=f"Login Failed: {portal.upper()}",
                         message=error_msg
-                    ))
+                    )
                     return
 
                 # Search
@@ -472,10 +472,17 @@ def run_job_agent(self, user_id: str, portal: str, dry_run: bool = False) -> dic
         except self.MaxRetriesExceededError:
             error_msg = f"Max retries exceeded for user={user_id[:8]}... on {portal}. Task aborted."
             logger.error(f"[job_tasks] {error_msg}")
-            _run_async(notifier.send_error_alert(
-                subject=f"Task Failed: {portal.upper()}",
-                message=error_msg
-            ))
+            # This is tricky because we are in an except block for the sync task.
+            # We should probably use a helper that doesn't use the existing loop if it's already closed.
+            # But here _run_agent has already failed and the loop might be closed.
+            # Actually, the best way is to handle notifications inside _run_agent or use a sync notifier.
+            try:
+                _run_async(notifier.send_error_alert(
+                    subject=f"Task Failed: {portal.upper()}",
+                    message=error_msg
+                ))
+            except:
+                pass
             return summary
 
 

@@ -139,14 +139,16 @@ class BaseAgent(ABC):
     # Screenshots directory
     SCREENSHOTS_DIR: Path = Path("./screenshots")
 
-    def __init__(self, user_id: str, headless: bool = True):
+    def __init__(self, user_id: str, user_data: Optional[dict] = None, headless: bool = True):
         """
         Args:
             user_id: The UUID of the job-seeker this agent is running for.
                      Used for logging and cookie file naming.
+            user_data: Optional dict containing user profile (name, email, etc.)
             headless: Run browser hidden (True for production, False for debugging).
         """
         self.user_id = user_id
+        self.user_data = user_data or {}
         self.headless = headless
 
         # Playwright instances — set by launch()
@@ -473,7 +475,7 @@ class BaseAgent(ABC):
     async def _get_form_fields(self):
         """Finds all interactive form fields on the page."""
         return await self._page.query_selector_all(
-            "input:not([type='hidden']):not([type='submit']):not([type='checkbox']):not([type='radio']), "
+            "input:not([type='hidden']):not([type='submit']):not([type='checkbox']):not([type='radio']):not([type='file']), "
             "select, textarea"
         )
 
