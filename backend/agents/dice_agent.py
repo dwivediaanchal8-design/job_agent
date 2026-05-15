@@ -101,7 +101,13 @@ class DiceAgent(BaseAgent):
         try:
             await self._page.goto(self.LOGIN_URL, wait_until="domcontentloaded")
             await self._wait_for_page_load()
-            await self._human_delay(2000, 3000)  # Wait for React to render
+            await self._human_delay(3000, 5000)  # Wait more for React to render
+
+            # Check if we were redirected to dashboard because we're already logged in
+            if await self._is_logged_in():
+                self._log_action("login", "✅ Already logged in (redirected)")
+                await self.save_cookies()
+                return True
 
             # ── Handle Cookie Consent ──
             try:
@@ -204,17 +210,27 @@ class DiceAgent(BaseAgent):
                 "button:has-text('Logout')",
                 "a:has-text('Logout')",
                 "dhi-user-menu",
+                "button#dice-login-customer-name",
+                "span:has-text('Recommended for You')",
+                "h1:has-text('Aanchal')",
+                "div:has-text('Aanchal')",
             ]
             
             # Add dynamic name check if available
             name = self.user_data.get('name')
             if name:
+                first_name = name.split()[0]
                 indicators.append(f"button:has-text('{name}')")
                 indicators.append(f"span:has-text('{name}')")
+                indicators.append(f"div:has-text('{first_name}')")
+                
             for sel in indicators:
-                el = await self._page.query_selector(sel)
-                if el:
-                    return True
+                try:
+                    el = await self._page.query_selector(sel)
+                    if el:
+                        return True
+                except:
+                    continue
 
             # Check URL
             url = self._page.url.lower()
@@ -520,40 +536,82 @@ class DiceAgent(BaseAgent):
 
             await button.click()
             await self._wait_for_page_load()
-            await self._human_delay(2000, 3000)
+            await self._human_delay(3000, 5000)
 
-            # ── Phase 3: Smart AI-powered Form Filling ──
-            # Some Dice Easy Apply jobs have a small modal with extra questions
-            await self._smart_fill_form(user_data)
-
-            # Dice Easy Apply often shows a confirmation modal
-            confirm_btn = await self._page.query_selector(
-                "button:has-text('Apply'), "
-                "button:has-text('Submit Application'), "
-                "button[data-cy='apply-button']"
-            )
-            if confirm_btn:
-                await confirm_btn.click()
+            # ── Multi-step Application Loop ──
+            max_steps = 5
+            for step in range(max_steps):
+                # Clear cookie banner again (it often reappears in modals)
+                await self._page.evaluate("""() => {
+                    document.querySelectorAll('#onetrust-banner-sdk, .onetrust-pc-dark-filter, #onetrust-pc-sdk').forEach(el => el.remove());
+                }""")
+                
+                self._log_action("_do_easy_apply", f"Processing step {step+1}...")
+                
+                # ── Phase 3: Smart AI-powered Form Filling ──
+                await self._smart_fill_form(user_data)
+                
+                # Look for "Next", "Continue", or "Submit" / "Apply"
+                # Dice specific: 'apply-button-wc button' or 'button[data-testid="apply-button"]'
+                next_btn = await self._page.query_selector(
+                    "button:has-text('Next'), "
+                    "button:has-text('Continue'), "
+                    "button:has-text('Apply'), "
+                    "button:has-text('Submit'), "
+                    "button:has-text('Submit Application'), "
+                    "button[data-cy='apply-button'], "
+                    "button[data-testid='apply-button'], "
+                    "button.btn-primary"
+                )
+                
+                if not next_btn or not await next_btn.is_visible():
+                    # Maybe it's a success message already?
+                    success_el = await self._page.query_selector(
+                        "h2:has-text('Application Submitted'), "
+                        "div:has-text('applied successfully'), "
+                        "dhi-application-confirmation, "
+                        "h1:has-text('Thank you')"
+                    )
+                    if success_el:
+                        self._log_action("_do_easy_apply", "✅ Easy Apply submitted")
+                        return ApplicationResult(job=job, status="applied")
+                    
+                    break # No button found and not a success page
+                
+                btn_text = (await next_btn.inner_text()).strip()
+                self._log_action("_do_easy_apply", f"Clicking '{btn_text}'")
+                await next_btn.click()
                 await self._wait_for_page_load()
-                await self._human_delay(1500, 2000)
+                await self._human_delay(2000, 3000)
+                
+                # If we clicked "Apply" or "Submit", we might be done
+                if "Apply" in btn_text or "Submit" in btn_text:
+                    # Wait a bit longer for success message
+                    await self._human_delay(2000, 3000)
+                    success_el = await self._page.query_selector(
+                        "h2:has-text('Application Submitted'), "
+                        "div:has-text('applied successfully'), "
+                        "dhi-application-confirmation"
+                    )
+                    if success_el:
+                        self._log_action("_do_easy_apply", "✅ Easy Apply submitted")
+                        return ApplicationResult(job=job, status="applied")
 
-            # Check for success message
+            # Final check after loop
             success_el = await self._page.query_selector(
                 "h2:has-text('Application Submitted'), "
                 "div:has-text('applied successfully'), "
                 "dhi-application-confirmation"
             )
-
-            if success_el or dry_run:
-                self._log_action("_do_easy_apply", "✅ Easy Apply submitted")
+            if success_el:
                 return ApplicationResult(job=job, status="applied")
-            else:
-                await self._screenshot("dice_easy_apply_no_confirm")
-                return ApplicationResult(
-                    job=job,
-                    status="failed",
-                    failure_reason="no_confirmation_after_easy_apply",
-                )
+
+            await self._screenshot("dice_easy_apply_stuck")
+            return ApplicationResult(
+                job=job,
+                status="failed",
+                failure_reason="no_confirmation_after_easy_apply",
+            )
 
         except Exception as e:
             logger.error(f"[dice] Easy Apply exception: {e}")

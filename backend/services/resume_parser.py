@@ -134,7 +134,7 @@ class ResumeParser:
                     {"role": "user", "content": f"Parse this resume:\n\n{truncated}"},
                 ],
                 temperature=0.1,
-                max_tokens=2000,
+                max_tokens=1000,
                 response_format={"type": "json_object"},
             )
             data = json.loads(response.choices[0].message.content)

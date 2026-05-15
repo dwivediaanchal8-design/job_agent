@@ -15,7 +15,7 @@ USER_EMAIL = "dwivediaanchal8@gmail.com"
 PORTAL = "dice" # Change to "indeed" if desired
 DRY_RUN = True
 
-async def test_run():
+def test_run():
     logger.info(f"🧪 Starting verification run for {USER_EMAIL} on {PORTAL}...")
     
     # We need to get the user_id first
@@ -51,9 +51,4 @@ async def test_run():
         logger.error(f"❌ Verification run failed: {e}")
 
 if __name__ == "__main__":
-    # run_job_agent handles its own event loop internally via _run_async
-    # so we don't call it with asyncio.run() if it calls asyncio.run() itself.
-    # Actually, job_tasks.py uses _run_async(coro) which is asyncio.run(coro).
-    # Since run_job_agent is a sync function (Celery task), we just call it.
-    import asyncio
-    asyncio.run(test_run())
+    test_run()

@@ -16,10 +16,10 @@ async def main():
     # Get job-seeker user ID
     with SyncSessionFactory() as db:
         row = db.execute(
-            text("SELECT id FROM users WHERE role='job_seeker' AND is_active=true LIMIT 1")
+            text("SELECT id FROM users WHERE email='dwivediaanchal8@gmail.com' LIMIT 1")
         ).fetchone()
         if not row:
-            print("ERROR: No job-seeker user found!")
+            print("ERROR: User dwivediaanchal8@gmail.com not found!")
             return
         user_id = row.id
         print(f"User ID: {user_id}")
